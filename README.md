@@ -178,6 +178,12 @@ Consider hosting on:
 
 ---
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
 ## Important Notes
 
 - **Never share your `.env` file** or commit it to Git. Add it to `.gitignore`.

@@ -1,3 +1,7 @@
+/**
+ * /mute command. Applies a Discord timeout (communication disabled) to a member.
+ * Requires the ModerateMembers permission. Duration is selected from a fixed set of choices.
+ */
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { sendLog } = require('../utils/logger');
 

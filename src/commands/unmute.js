@@ -1,3 +1,7 @@
+/**
+ * /unmute command. Removes an active timeout from a member.
+ * Requires the ModerateMembers permission. Only works if the user is currently timed out.
+ */
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { sendLog } = require('../utils/logger');
 

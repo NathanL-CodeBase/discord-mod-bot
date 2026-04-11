@@ -1,3 +1,7 @@
+/**
+ * Event: interactionCreate. Routes incoming slash command interactions to their handlers.
+ * Ignores non-chat-input interactions and sends a fallback error reply on failure.
+ */
 module.exports = {
   name: 'interactionCreate',
   async execute(interaction, client) {

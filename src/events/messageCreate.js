@@ -1,3 +1,8 @@
+/**
+ * Event: messageCreate. Runs auto-moderation checks on every new message.
+ * Enforces bad word filtering, link blocking, and sliding-window spam detection
+ * with escalating timeouts. Moderators (ManageMessages) bypass all checks.
+ */
 const { sendLog } = require('../utils/logger');
 
 const SPAM_THRESHOLD = parseInt(process.env.SPAM_THRESHOLD ?? '5', 10);
@@ -71,6 +76,13 @@ module.exports = {
   },
 };
 
+/**
+ * Deletes a violating message, sends a temporary warning in the channel, and logs the event.
+ * @param {Message} message - The offending message
+ * @param {Client} client
+ * @param {'bad_word'|'link'|'spam'} type - Violation type
+ * @param {string} warningText - Text sent to the channel as a temporary warning
+ */
 async function handleViolation(message, client, type, warningText) {
   const typeLabels = {
     bad_word: 'Bad Word Detected',

@@ -1,3 +1,7 @@
+/**
+ * /warn command. Issues a warning to a member and stores it persistently.
+ * Requires the ModerateMembers permission. Notifies the target via DM with their total warning count.
+ */
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { addWarning } = require('../utils/warnings');
 const { sendLog } = require('../utils/logger');

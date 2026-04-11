@@ -1,3 +1,7 @@
+/**
+ * Event: ready (once). Fires when the bot successfully connects to Discord.
+ * Logs the bot tag and guild count, then sets the bot's activity status.
+ */
 const { ActivityType } = require('discord.js');
 
 module.exports = {

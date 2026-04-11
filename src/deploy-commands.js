@@ -1,3 +1,10 @@
+/**
+ * Deploys slash commands to a specific Discord guild via the REST API.
+ * Reads all command files from src/commands/ and registers them.
+ *
+ * Usage: node src/deploy-commands.js
+ * Requires: BOT_TOKEN, CLIENT_ID, GUILD_ID in .env
+ */
 require('dotenv').config();
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');

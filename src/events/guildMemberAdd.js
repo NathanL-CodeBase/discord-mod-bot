@@ -1,3 +1,7 @@
+/**
+ * Event: guildMemberAdd. Fires when a user joins the guild.
+ * Logs the join with account age and flags accounts newer than 7 days.
+ */
 const { sendLog } = require('../utils/logger');
 
 module.exports = {

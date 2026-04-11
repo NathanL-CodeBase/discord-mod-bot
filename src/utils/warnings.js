@@ -1,3 +1,7 @@
+/**
+ * Warnings persistence utility. Reads and writes warning records to data/warnings.json.
+ * Exports: addWarning, getWarnings, clearWarnings
+ */
 const fs = require('fs');
 const path = require('path');
 

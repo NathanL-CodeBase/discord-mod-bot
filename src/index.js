@@ -1,3 +1,7 @@
+/**
+ * Bot entry point. Loads environment variables, registers commands and events,
+ * then logs the client into Discord.
+ */
 require('dotenv').config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');

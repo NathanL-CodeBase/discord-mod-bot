@@ -1,3 +1,7 @@
+/**
+ * Event: messageUpdate. Fires when a message is edited.
+ * Logs the before and after content. Skips partials, bots, and no-content-change edits.
+ */
 const { sendLog } = require('../utils/logger');
 
 module.exports = {

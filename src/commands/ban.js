@@ -1,3 +1,7 @@
+/**
+ * /ban command. Bans a member from the server, optionally deleting recent messages.
+ * Requires the BanMembers permission. Notifies the target via DM before banning.
+ */
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { sendLog } = require('../utils/logger');
 

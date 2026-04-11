@@ -1,3 +1,7 @@
+/**
+ * Logging utility. Sends color-coded embeds to the configured LOG_CHANNEL_ID.
+ * Exports: sendLog
+ */
 const { EmbedBuilder } = require('discord.js');
 
 const COLORS = {

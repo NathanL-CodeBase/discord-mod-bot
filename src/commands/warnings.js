@@ -1,3 +1,7 @@
+/**
+ * /warnings command. Views or clears the warning history for a member.
+ * Requires the ModerateMembers permission. Displays up to the last 10 warnings as an embed.
+ */
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { getWarnings, clearWarnings } = require('../utils/warnings');
 const { sendLog } = require('../utils/logger');

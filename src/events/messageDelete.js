@@ -1,3 +1,7 @@
+/**
+ * Event: messageDelete. Fires when a message is deleted.
+ * Logs the author, channel, and original content. Skips partial or bot messages.
+ */
 const { sendLog } = require('../utils/logger');
 
 module.exports = {

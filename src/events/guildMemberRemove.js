@@ -1,3 +1,7 @@
+/**
+ * Event: guildMemberRemove. Fires when a user leaves or is removed from the guild.
+ * Logs the departure along with the roles the member held.
+ */
 const { sendLog } = require('../utils/logger');
 
 module.exports = {

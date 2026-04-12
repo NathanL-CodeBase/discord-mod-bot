@@ -42,7 +42,7 @@ module.exports = {
 
     // ── Bad Word Filter ──────────────────────────────────────
     if (BAD_WORDS.length && BAD_WORDS.some(word => lower.includes(word))) {
-      await handleViolation(message, client, 'bad_word', 'Your message was removed: Watch yo mouth, hoe.');
+      await handleViolation(message, client, 'bad_word', 'Your message was removed: Watch yo mouth...Hoe.');
       return;
     }
 

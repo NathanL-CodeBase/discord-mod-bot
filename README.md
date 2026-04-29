@@ -231,13 +231,62 @@ discord-mod-bot/
 
 ---
 
-## Running 24/7
+## Updating an Existing Installation
 
-Consider hosting on:
-- **Railway** (free tier available) — [railway.app](https://railway.app)
-- **Render** — [render.com](https://render.com)
-- **A VPS** (DigitalOcean, Linode, etc.)
-- **Your own machine** with `pm2`: `npm install -g pm2 && pm2 start src/index.js`
+If the bot is already running in a server and you are pulling the latest code, follow these steps. The `guildCreate` event only fires when the bot first joins — existing servers will not receive the automatic setup DM.
+
+### Step 1 — Pull the latest code and install dependencies
+
+```bash
+git pull
+npm install
+```
+
+### Step 2 — Update your `.env`
+
+Remove `GUILD_ID` and `LOG_CHANNEL_ID` — they are no longer used. Keep everything else.
+
+```env
+BOT_TOKEN=...        # keep
+CLIENT_ID=...        # keep
+# GUILD_ID=...       # remove — no longer used
+# LOG_CHANNEL_ID=... # remove — set per-server with /setup log-channel instead
+BAD_WORDS=...        # keep — applies globally to all servers
+BLOCK_LINKS=...      # keep — global default, can be overridden per server
+SPAM_THRESHOLD=...   # keep — global default, can be overridden per server
+```
+
+### Step 3 — Re-deploy slash commands
+
+This registers the new `/setup` command. Run it once while the bot is stopped.
+
+```bash
+npm run deploy
+```
+
+> Global commands can take up to 1 hour to appear in existing servers.
+
+### Step 4 — Restart the bot
+
+```bash
+npm start
+```
+
+If you are using `pm2`:
+
+```bash
+pm2 restart all
+```
+
+### Step 5 — Restore the log channel in each server
+
+All moderation commands continue to work immediately, but logging will be silent until you set a log channel. Run this in each server:
+
+```
+/setup log-channel #your-mod-log-channel
+```
+
+Your existing warning history in `data/warnings.json` carries over automatically — no action needed there.
 
 ---
 

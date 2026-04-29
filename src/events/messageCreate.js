@@ -2,18 +2,24 @@
  * Event: messageCreate. Runs auto-moderation checks on every new message.
  * Enforces bad word filtering, link blocking, and sliding-window spam detection
  * with escalating timeouts. Moderators (ManageMessages) bypass all checks.
+ *
+ * Bad words: global list from BAD_WORDS env + per-guild extraBadWords from guild config.
+ * All other settings (blockLinks, spamThreshold) are per-guild with env-var fallbacks.
  */
 const { sendLog } = require('../utils/logger');
+const { getConfig } = require('../utils/guildConfig');
 
-const SPAM_THRESHOLD = parseInt(process.env.SPAM_THRESHOLD ?? '5', 10);
+const GLOBAL_BAD_WORDS = (process.env.BAD_WORDS ?? '')
+  .split(',')
+  .map(w => w.trim().toLowerCase())
+  .filter(Boolean);
+
 const SPAM_WINDOW_MS = 5000;
-const BAD_WORDS = (process.env.BAD_WORDS ?? '').split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
-const BLOCK_LINKS = process.env.BLOCK_LINKS === 'true';
 
-// Sliding window spam tracker: userId -> timestamp[]
+// Sliding window spam tracker: `guildId:userId` -> timestamp[]
 const spamHistory = new Map();
 
-// Escalation tracker: userId -> offense count (resets on bot restart)
+// Escalation tracker: `guildId:userId` -> offense count (resets on bot restart)
 const spamOffenses = new Map();
 
 const ESCALATION_TIMEOUTS = [
@@ -22,10 +28,10 @@ const ESCALATION_TIMEOUTS = [
   3_600_000,    // 3rd+ offense: 1 hour
 ];
 
-function getTimeoutMs(userId) {
-  const offense = spamOffenses.get(userId) ?? 0;
+function getTimeoutMs(trackKey) {
+  const offense = spamOffenses.get(trackKey) ?? 0;
   const index = Math.min(offense, ESCALATION_TIMEOUTS.length - 1);
-  spamOffenses.set(userId, offense + 1);
+  spamOffenses.set(trackKey, offense + 1);
   return ESCALATION_TIMEOUTS[index];
 }
 
@@ -37,39 +43,46 @@ module.exports = {
     // Moderators bypass auto-mod
     if (message.member?.permissions.has('ManageMessages')) return;
 
+    const guildId = message.guild.id;
+    const config = getConfig(guildId);
+
+    const allBadWords = [...GLOBAL_BAD_WORDS, ...(config.extraBadWords ?? [])];
+    const blockLinks = config.blockLinks ?? false;
+    const spamThreshold = config.spamThreshold ?? parseInt(process.env.SPAM_THRESHOLD ?? '5', 10);
+
     const content = message.content;
     const lower = content.toLowerCase();
 
     // ── Bad Word Filter ──────────────────────────────────────
-    if (BAD_WORDS.length && BAD_WORDS.some(word => lower.includes(word))) {
+    if (allBadWords.length && allBadWords.some(word => lower.includes(word))) {
       await handleViolation(message, client, 'bad_word', 'Your message was removed: Watch yo mouth...Hoe.');
       return;
     }
 
     // ── Link Filter ──────────────────────────────────────────
-    if (BLOCK_LINKS && /https?:\/\/[^\s]+/i.test(content)) {
+    if (blockLinks && /https?:\/\/[^\s]+/i.test(content)) {
       await handleViolation(message, client, 'link', 'Your message was removed: links are not allowed.');
       return;
     }
 
     // ── Spam Detection (sliding window) ──────────────────────
     const now = Date.now();
-    const userId = message.author.id;
-    const timestamps = spamHistory.get(userId) ?? [];
+    const trackKey = `${guildId}:${message.author.id}`;
+    const timestamps = spamHistory.get(trackKey) ?? [];
 
     // Prune entries outside the window, then add current timestamp
     const pruned = timestamps.filter(t => now - t < SPAM_WINDOW_MS);
     pruned.push(now);
-    spamHistory.set(userId, pruned);
+    spamHistory.set(trackKey, pruned);
 
-    if (pruned.length >= SPAM_THRESHOLD) {
-      spamHistory.set(userId, []);
+    if (pruned.length >= spamThreshold) {
+      spamHistory.set(trackKey, []);
 
       await handleViolation(message, client, 'spam', 'Slow down! You are sending messages too fast.');
 
       if (message.member?.moderatable) {
-        const timeoutMs = getTimeoutMs(userId);
-        const offense = spamOffenses.get(userId);
+        const timeoutMs = getTimeoutMs(trackKey);
+        const offense = spamOffenses.get(trackKey);
         await message.member.timeout(timeoutMs, `Auto-mod: spam detected (offense #${offense})`).catch(() => {});
       }
     }

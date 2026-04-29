@@ -26,7 +26,7 @@ module.exports = {
       await target.timeout(null, `${reason} | Unmuted by ${interaction.user.username}`);
       await interaction.reply({ content: `**${target.user.username}** has been unmuted.`, ephemeral: true });
 
-      await sendLog(client, 'unmute', {
+      await sendLog(client, interaction.guildId, 'unmute', {
         title: 'Member Unmuted',
         fields: [
           { name: 'User',      value: `${target.user.username} (${target.id})`, inline: true },

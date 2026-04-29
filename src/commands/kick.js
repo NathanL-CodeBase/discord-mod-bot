@@ -29,7 +29,7 @@ module.exports = {
 
       await interaction.reply({ content: `**${target.user.username}** has been kicked. Reason: ${reason}`, ephemeral: true });
 
-      await sendLog(client, 'kick', {
+      await sendLog(client, interaction.guildId, 'kick', {
         title: 'Member Kicked',
         fields: [
           { name: 'User',      value: `${target.user.username} (${target.id})`, inline: true },

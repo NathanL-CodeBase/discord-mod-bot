@@ -28,7 +28,7 @@ module.exports = {
 
       await interaction.reply({ content: `Cleared all warnings for **${target.user.username}**.`, ephemeral: true });
 
-      await sendLog(client, 'warn', {
+      await sendLog(client, interaction.guildId, 'warn', {
         title: 'Warnings Cleared',
         fields: [
           { name: 'User',      value: `${target.user.username} (${target.id})`, inline: true },

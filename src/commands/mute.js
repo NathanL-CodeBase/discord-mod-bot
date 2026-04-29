@@ -51,7 +51,7 @@ module.exports = {
       await target.timeout(durationMs, `${reason} | Muted by ${interaction.user.username}`);
       await interaction.reply({ content: `**${target.user.username}** has been muted for ${durationLabel}. Reason: ${reason}`, ephemeral: true });
 
-      await sendLog(client, 'mute', {
+      await sendLog(client, interaction.guildId, 'mute', {
         title: 'Member Muted',
         fields: [
           { name: 'User',      value: `${target.user.username} (${target.id})`, inline: true },

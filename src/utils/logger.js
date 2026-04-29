@@ -1,8 +1,10 @@
 /**
- * Logging utility. Sends color-coded embeds to the configured LOG_CHANNEL_ID.
+ * Logging utility. Sends color-coded embeds to the guild's configured log channel.
+ * Channel is looked up per-guild from data/guild-configs.json.
  * Exports: sendLog
  */
 const { EmbedBuilder } = require('discord.js');
+const { getConfig } = require('./guildConfig');
 
 const COLORS = {
   ban:     0xe74c3c,  // red
@@ -20,11 +22,13 @@ const COLORS = {
 /**
  * Send a structured embed to the guild's log channel.
  * @param {Client} client
+ * @param {string} guildId
  * @param {string} type - One of the keys in COLORS
- * @param {Object} fields - { title, description, fields: [{name, value}] }
+ * @param {Object} payload - { title, description, fields: [{name, value}] }
  */
-async function sendLog(client, type, { title, description, fields = [] }) {
-  const channelId = process.env.LOG_CHANNEL_ID;
+async function sendLog(client, guildId, type, { title, description, fields = [] }) {
+  const config = getConfig(guildId);
+  const channelId = config.logChannelId;
   if (!channelId) return;
 
   const channel = await client.channels.fetch(channelId).catch(() => null);

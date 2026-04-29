@@ -34,7 +34,7 @@ module.exports = {
       ephemeral: true,
     });
 
-    await sendLog(client, 'warn', {
+    await sendLog(client, interaction.guildId, 'warn', {
       title: 'Member Warned',
       fields: [
         { name: 'User',           value: `${target.user.username} (${target.id})`, inline: true },

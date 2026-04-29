@@ -64,7 +64,7 @@ module.exports = {
 
     await interaction.editReply({ content: summary + ageWarning });
 
-    await sendLog(client, 'delete', {
+    await sendLog(client, interaction.guildId, 'delete', {
       title: '🗑️ Purge Executed',
       fields: [
         { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },

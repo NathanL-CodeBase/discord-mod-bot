@@ -12,7 +12,7 @@ module.exports = {
       .map(r => r.name)
       .join(', ') || 'None';
 
-    await sendLog(client, 'leave', {
+    await sendLog(client, member.guild.id, 'leave', {
       title: 'Member Left',
       fields: [
         { name: 'User', value: `${member.user.username} (${member.id})`, inline: true },

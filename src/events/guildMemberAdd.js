@@ -10,7 +10,7 @@ module.exports = {
     const accountAge = Math.floor((Date.now() - member.user.createdTimestamp) / (1000 * 60 * 60 * 24));
     const isNew = accountAge < 7;
 
-    await sendLog(client, 'join', {
+    await sendLog(client, member.guild.id, 'join', {
       title: 'Member Joined',
       description: isNew ? 'New account (less than 7 days old)' : undefined,
       fields: [

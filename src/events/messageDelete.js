@@ -9,7 +9,7 @@ module.exports = {
   async execute(message, client) {
     if (message.partial || message.author?.bot) return;
 
-    await sendLog(client, 'delete', {
+    await sendLog(client, message.guild?.id, 'delete', {
       title: 'Message Deleted',
       fields: [
         { name: 'Author', value: `${message.author.username} (${message.author.id})`, inline: true },

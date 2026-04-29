@@ -32,7 +32,7 @@ module.exports = {
 
       await interaction.reply({ content: `**${target.user.username}** has been banned. Reason: ${reason}`, ephemeral: true });
 
-      await sendLog(client, 'ban', {
+      await sendLog(client, interaction.guildId, 'ban', {
         title: 'Member Banned',
         fields: [
           { name: 'User',      value: `${target.user.username} (${target.id})`, inline: true },

@@ -11,7 +11,7 @@ module.exports = {
     if (oldMessage.author?.bot) return;
     if (oldMessage.content === newMessage.content) return;
 
-    await sendLog(client, 'edit', {
+    await sendLog(client, newMessage.guild?.id, 'edit', {
       title: 'Message Edited',
       fields: [
         { name: 'Author', value: `${oldMessage.author.username} (${oldMessage.author.id})`, inline: true },

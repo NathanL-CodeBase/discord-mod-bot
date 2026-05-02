@@ -118,7 +118,14 @@ module.exports = {
 
     // ── Bad Word Filter ──────────────────────────────────────────────────────
     if (allPatterns.length && matchesAny(content, allPatterns)) {
-      await handleViolation(message, client, 'bad_word', 'Your message was removed: Watch yo mouth...Hoe.', content);
+      const BAD_WORD_RESPONSES = [
+        'Your message was removed: Watch yo mouth...Hoe.',
+        'Your message was removed: Tactical Assessment - Slur bypass victory. IMPOSSIBLE!',
+        'Your message was removed: That mouth needs soap.',
+        'Your message was removed: Bold choice. Wrong choice.',
+      ];
+      const response = BAD_WORD_RESPONSES[Math.floor(Math.random() * BAD_WORD_RESPONSES.length)];
+      await handleViolation(message, client, 'bad_word', response, content);
       return;
     }
 

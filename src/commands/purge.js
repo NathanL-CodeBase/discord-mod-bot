@@ -8,7 +8,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addIntegerOption(opt =>
       opt.setName('amount')
-        .setDescription('Number of messages to delete (1–100)')
+        .setDescription('Number of messages to delete (1-100)')
         .setMinValue(1)
         .setMaxValue(100)
         .setRequired(true))

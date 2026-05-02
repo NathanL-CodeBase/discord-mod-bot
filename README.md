@@ -15,7 +15,7 @@ A full-featured Discord moderation bot built with **discord.js v14**. Supports m
 | `/unmute` | Remove a timeout | Moderate Members |
 | `/warn` | Issue a warning (stored persistently) | Moderate Members |
 | `/warnings` | View or clear a member's warnings | Moderate Members |
-| `/purge` | Bulk delete up to 100 messages | Manage Messages |
+| `/purge` | Bulk delete up to 100 messages (optional: filter by user; skips messages older than 14 days) | Manage Messages |
 | `/setup` | Configure the bot for this server | Administrator |
 
 ### `/setup` Subcommands
@@ -30,9 +30,14 @@ A full-featured Discord moderation bot built with **discord.js v14**. Supports m
 | `/setup view` | Show the full current configuration for this server |
 
 ### Auto-Moderation
-- **Bad word filter** — Deletes messages containing words from the global list or the server's extra list
+- **Bad word filter** — Deletes messages containing words from the global list or the server's extra list. Matching is evasion-resistant:
+  - Leet-speak normalization (`@` → `a`, `3` → `e`, `$` → `s`, `ph` → `f`, etc.)
+  - Diacritic stripping (`fück` → `fuck`, `slür` → `slur`)
+  - Zero-width / invisible Unicode removal (common copy-paste evasion)
+  - Fuzzy symbol substitution (`f*ck`, `f.u.c.k`, `h-a-t-e` all match)
 - **Link blocker** — Optionally blocks all HTTP/HTTPS URLs (per server)
 - **Spam detection** — Mutes users who send too many messages too fast; escalating timeouts (1 min, 5 min, 1 hour)
+- **Moderator bypass** — Members with the `Manage Messages` permission are exempt from all auto-mod checks
 
 ### Logging (to your configured `#mod-log` channel)
 - Member joins (flags accounts less than 7 days old)

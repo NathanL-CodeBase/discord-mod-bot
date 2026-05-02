@@ -28,21 +28,35 @@ function getTimeoutMs(trackKey) {
 }
 
 // Collapses leet-speak substitutions to plain text before matching.
-// Handles: @->a, !->i, $->s, 0->o, 1->i, 3->e, 4->a, 5->s, 7->t, 9->g
 // Does NOT strip * so the fuzzy pattern can handle f*ck-style evasion separately.
 function normalize(str) {
   return str
     .toLowerCase()
+    // Strip zero-width/invisible Unicode (U+200B–U+200D, U+2060, BOM) — invisible evasion chars
+    .replace(/[​-‍⁠﻿]/g, '')
+    // Decompose diacritics then strip combining marks (é→e, ü→u, ñ→n, fück→fuck, etc.)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    // Multi-character substitutions first so letters aren't consumed individually
+    .replace(/ph/g, 'f')   // phuck, phag
+    .replace(/vv/g, 'w')   // vvhore
+    // Single-character leet substitutions
     .replace(/@/g, 'a')
     .replace(/!/g, 'i')
     .replace(/\$/g, 's')
     .replace(/0/g, 'o')
     .replace(/1/g, 'i')
+    .replace(/2/g, 'z')
     .replace(/3/g, 'e')
     .replace(/4/g, 'a')
     .replace(/5/g, 's')
+    .replace(/6/g, 'b')    // 6 rotated ≈ b
     .replace(/7/g, 't')
+    .replace(/8/g, 'b')    // 8 ≈ b
     .replace(/9/g, 'g')
+    .replace(/\+/g, 't')
+    .replace(/\|/g, 'l')
+    .replace(/\(/g, 'c')
+    .replace(/</g, 'c')
     .replace(/\s+/g, ' ')
     .trim();
 }

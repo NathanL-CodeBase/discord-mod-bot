@@ -233,7 +233,7 @@ discord-mod-bot/
 
 ## Updating an Existing Installation
 
-If the bot is already running in a server and you are pulling the latest code, follow these steps. The `guildCreate` event only fires when the bot first joins — existing servers will not receive the automatic setup DM.
+If the bot is already running in one or more servers and you are pulling the latest code, follow these steps. The `guildCreate` event only fires when the bot first joins a server — existing servers will not receive the automatic setup DM.
 
 ### Step 1 — Pull the latest code and install dependencies
 

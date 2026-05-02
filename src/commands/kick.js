@@ -1,5 +1,5 @@
 /**
- * /kick command. Kicks a member from the server with an optional reason.
+ * /kick command. Kicks a member from the server where the command is used, with an optional reason.
  * Requires the KickMembers permission. Notifies the target via DM before kicking.
  */
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');

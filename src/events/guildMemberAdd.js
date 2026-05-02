@@ -12,7 +12,7 @@ module.exports = {
 
     await sendLog(client, member.guild.id, 'join', {
       title: 'Member Joined',
-      description: isNew ? 'New account (less than 7 days old)' : undefined,
+      description: isNew ? 'WARNING: New account (less than 7 days old)' : undefined,
       fields: [
         { name: 'User', value: `${member.user.username} (${member.id})`, inline: true },
         { name: 'Account Age', value: `${accountAge} day(s)`, inline: true },

@@ -52,8 +52,8 @@ module.exports = {
       .setDescription(`**${warnings.length}** total warning(s)`)
       .addFields(
         warnings.slice(-10).map((w, i) => ({
-          name:  `Warning #${i + 1} — ${new Date(w.timestamp).toLocaleDateString()}`,
-          value: `**Reason:** ${w.reason}\n**By:** <@${w.moderatorId}>`,
+          name:  `Warning #${i + 1} - ${new Date(w.timestamp).toLocaleDateString()}`,
+          value: `Reason: ${w.reason}\nBy: <@${w.moderatorId}>`,
         }))
       )
       .setFooter({ text: warnings.length > 10 ? 'Showing last 10 warnings' : '' });

@@ -88,11 +88,15 @@ function buildExtraPatterns(extraWords) {
 }
 
 // Tests raw content, leet-normalized content, and fuzzy (symbol-substituted) content.
+// Fuzzy matches are only accepted when the matched substring contains at least one real letter,
+// preventing pure-symbol sequences (ellipses, raw numbers, emoji) from triggering false positives.
 function matchesAny(content, patterns) {
   const normalizedContent = normalize(content);
-  return patterns.some(({ rawPattern, normPattern, fuzzyPattern }) =>
-    rawPattern.test(content) || normPattern.test(normalizedContent) || fuzzyPattern.test(content)
-  );
+  return patterns.some(({ rawPattern, normPattern, fuzzyPattern }) => {
+    if (rawPattern.test(content) || normPattern.test(normalizedContent)) return true;
+    const m = content.match(fuzzyPattern);
+    return m !== null && /[a-z]/i.test(m[0]);
+  });
 }
 
 // Module-level constant — no /g flag so .test() never has stale lastIndex state.

@@ -11,6 +11,30 @@ const GLOBAL_BAD_WORDS = (process.env.BAD_WORDS ?? '')
   .map(w => w.trim().toLowerCase())
   .filter(Boolean);
 
+// Splits a word list into one or more embed fields, respecting Discord's 1024-char field limit.
+function wordListFields(label, words) {
+  if (!words.length) return [{ name: label, value: '*None*' }];
+  const fields = [];
+  let current = [];
+  let currentLen = 0;
+  for (const word of words) {
+    const formatted = `\`${word}\``;
+    const addLen = current.length === 0 ? formatted.length : formatted.length + 2;
+    if (currentLen + addLen > 1000 && current.length > 0) {
+      fields.push({ name: fields.length === 0 ? label : `${label} (cont.)`, value: current.map(w => `\`${w}\``).join(', ') });
+      current = [word];
+      currentLen = formatted.length;
+    } else {
+      current.push(word);
+      currentLen += addLen;
+    }
+  }
+  if (current.length > 0) {
+    fields.push({ name: fields.length === 0 ? label : `${label} (cont.)`, value: current.map(w => `\`${w}\``).join(', ') });
+  }
+  return fields;
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup')
@@ -97,22 +121,13 @@ module.exports = {
 
     if (sub === 'view-bad-words') {
       const extraWords = config.extraBadWords ?? [];
-
-      const globalValue = GLOBAL_BAD_WORDS.length
-        ? `\`${GLOBAL_BAD_WORDS.join('`, `')}\``
-        : '*None configured*';
-
-      const serverValue = extraWords.length
-        ? `\`${extraWords.join('`, `')}\``
-        : '*None added*';
+      const globalFields = wordListFields(`Global Words (${GLOBAL_BAD_WORDS.length})`, GLOBAL_BAD_WORDS);
+      const serverFields = wordListFields(`Server-Specific Words (${extraWords.length})`, extraWords);
 
       const embed = new EmbedBuilder()
         .setTitle('Banned Word Lists')
         .setColor(0x9b59b6)
-        .addFields(
-          { name: `Global Words (${GLOBAL_BAD_WORDS.length})`, value: globalValue },
-          { name: `Server-Specific Words (${extraWords.length})`, value: serverValue },
-        )
+        .addFields(...globalFields, ...serverFields)
         .setFooter({ text: 'Both lists are enforced together. Use /setup add-bad-words to add server words.' });
 
       return interaction.reply({ embeds: [embed], ephemeral: true });

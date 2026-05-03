@@ -64,15 +64,18 @@ function normalize(str) {
 const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Catches character-replacement evasions: f*ck, f.u.c.k, h-a-t-e, etc.
-// Each letter position in the word may match the correct letter OR any non-alpha, non-space symbol.
+// Each letter position may match the correct letter OR any non-alpha, non-digit, non-space symbol.
+// Digits are intentionally excluded — they are handled by the leet normalization path above,
+// and allowing them here causes false positives like "400k" matching "fuck".
 // Uses lookbehind/lookahead instead of \b because the match may start/end with a non-word char.
 function buildFuzzyPattern(word) {
-  const pattern = word.split('').map(c => `(?:${escapeRegex(c)}|[^a-z\\s])`).join('');
+  const pattern = word.split('').map(c => `(?:${escapeRegex(c)}|[^a-z\\d\\s])`).join('');
   return new RegExp(`(?<![a-z\\d])${pattern}(?![a-z\\d])`, 'i');
 }
 
 function buildPatterns(word) {
   return {
+    word,
     rawPattern:   new RegExp(`\\b${escapeRegex(word)}\\b`, 'i'),
     normPattern:  new RegExp(`\\b${escapeRegex(normalize(word))}\\b`, 'i'),
     fuzzyPattern: buildFuzzyPattern(word),
@@ -88,15 +91,21 @@ function buildExtraPatterns(extraWords) {
 }
 
 // Tests raw content, leet-normalized content, and fuzzy (symbol-substituted) content.
-// Fuzzy matches are only accepted when the matched substring contains at least one real letter,
-// preventing pure-symbol sequences (ellipses, raw numbers, emoji) from triggering false positives.
-function matchesAny(content, patterns) {
+// Returns { flaggedToken, matchedBadWord, matchType } on the first match, or null.
+// matchType: 'raw' | 'leet' | 'fuzzy'
+function findBadWordMatch(content, patterns) {
   const normalizedContent = normalize(content);
-  return patterns.some(({ rawPattern, normPattern, fuzzyPattern }) => {
-    if (rawPattern.test(content) || normPattern.test(normalizedContent)) return true;
-    const m = content.match(fuzzyPattern);
-    return m !== null && /[a-z]/i.test(m[0]);
-  });
+  for (const { word, rawPattern, normPattern, fuzzyPattern } of patterns) {
+    let m;
+    if ((m = content.match(rawPattern)))
+      return { flaggedToken: m[0], matchedBadWord: word, matchType: 'raw' };
+    if ((m = normalizedContent.match(normPattern)))
+      return { flaggedToken: m[0], matchedBadWord: word, matchType: 'leet' };
+    m = content.match(fuzzyPattern);
+    if (m !== null && /[a-z]/i.test(m[0]))
+      return { flaggedToken: m[0], matchedBadWord: word, matchType: 'fuzzy' };
+  }
+  return null;
 }
 
 // Module-level constant — no /g flag so .test() never has stale lastIndex state.
@@ -121,7 +130,8 @@ module.exports = {
     const content = message.content;
 
     // ── Bad Word Filter ──────────────────────────────────────────────────────
-    if (allPatterns.length && matchesAny(content, allPatterns)) {
+    const badWordMatch = allPatterns.length ? findBadWordMatch(content, allPatterns) : null;
+    if (badWordMatch) {
       const BAD_WORD_RESPONSES = [
         'Your message was removed: Watch yo mouth...Hoe.',
         'Your message was removed: Tactical Assessment - Slur bypass victory. IMPOSSIBLE!',
@@ -129,7 +139,7 @@ module.exports = {
         'Your message was removed: Bold choice. Wrong choice.',
       ];
       const response = BAD_WORD_RESPONSES[Math.floor(Math.random() * BAD_WORD_RESPONSES.length)];
-      await handleViolation(message, client, 'bad_word', response, content);
+      await handleViolation(message, client, 'bad_word', response, content, badWordMatch);
       return;
     }
 
@@ -163,7 +173,8 @@ module.exports = {
 };
 
 // content is passed explicitly so it is captured before message.delete() clears it from the object.
-async function handleViolation(message, client, type, warningText, content) {
+// matchInfo is optional; when provided (bad_word violations) it logs the flagged token and matched rule.
+async function handleViolation(message, client, type, warningText, content, matchInfo = null) {
   const typeLabels = {
     bad_word: 'Bad Word Detected',
     link:     'Link Blocked',
@@ -178,13 +189,22 @@ async function handleViolation(message, client, type, warningText, content) {
 
   if (warning) setTimeout(() => warning.delete().catch(() => {}), 5000);
 
+  const fields = [
+    { name: 'User',    value: `${message.author.username} (${message.author.id})`, inline: true },
+    { name: 'Channel', value: `<#${message.channel.id}>`,                          inline: true },
+    { name: 'Reason',  value: typeLabels[type] ?? type,                             inline: true },
+    { name: 'Message', value: content?.substring(0, 1024) || '*empty*' },
+  ];
+
+  if (matchInfo) {
+    fields.push({
+      name:  'Flagged',
+      value: `token: \`${matchInfo.flaggedToken}\`  →  rule: \`${matchInfo.matchedBadWord}\`  (${matchInfo.matchType})`,
+    });
+  }
+
   await sendLog(client, message.guild.id, 'automod', {
     title: `Auto-Mod: ${typeLabels[type] ?? type}`,
-    fields: [
-      { name: 'User',    value: `${message.author.username} (${message.author.id})`, inline: true },
-      { name: 'Channel', value: `<#${message.channel.id}>`,                          inline: true },
-      { name: 'Reason',  value: typeLabels[type] ?? type,                             inline: true },
-      { name: 'Message', value: content?.substring(0, 1024) || '*empty*' },
-    ],
+    fields,
   });
 }

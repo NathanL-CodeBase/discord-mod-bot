@@ -23,8 +23,15 @@ module.exports = {
 
     await interaction.deferReply({ ephemeral: true });
 
+    if (!interaction.channel?.isTextBased()) {
+      return interaction.editReply({ content: 'This command can only be used in text channels.' });
+    }
+
     // Fetch messages — Discord requires fetching before filtering
-    const fetched = await interaction.channel.messages.fetch({ limit: 100 }).catch(() => null);
+    const fetched = await interaction.channel.messages.fetch({ limit: 100 }).catch(err => {
+      console.error('purge: failed to fetch messages:', err);
+      return null;
+    });
 
     if (!fetched) {
       return interaction.editReply({ content: 'Failed to fetch messages.' });
@@ -48,7 +55,10 @@ module.exports = {
       });
     }
 
-    const deleted = await interaction.channel.bulkDelete(deletable, true).catch(() => null);
+    const deleted = await interaction.channel.bulkDelete(deletable, true).catch(err => {
+      console.error('purge: bulkDelete failed:', err);
+      return null;
+    });
 
     if (!deleted) {
       return interaction.editReply({ content: 'Failed to delete messages.' });

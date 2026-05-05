@@ -90,6 +90,21 @@ function buildExtraPatterns(extraWords) {
   return extraWords.map(buildPatterns);
 }
 
+// Rejects fuzzy matches where 2+ consecutive character positions are filled by symbols
+// rather than the actual letters of the bad word. This prevents Discord markdown like
+// **Or* (5 chars) from matching a 5-letter word just because the symbol count lines up.
+function fuzzyMatchIsReal(token, word) {
+  let consecutive = 0;
+  for (let i = 0; i < word.length; i++) {
+    if (token[i].toLowerCase() === word[i]) {
+      consecutive = 0;
+    } else {
+      if (++consecutive > 1) return false;
+    }
+  }
+  return true;
+}
+
 // Tests raw content, leet-normalized content, and fuzzy (symbol-substituted) content.
 // Returns { flaggedToken, matchedBadWord, matchType } on the first match, or null.
 // matchType: 'raw' | 'leet' | 'fuzzy'
@@ -102,7 +117,7 @@ function findBadWordMatch(content, patterns) {
     if ((m = normalizedContent.match(normPattern)))
       return { flaggedToken: m[0], matchedBadWord: word, matchType: 'leet' };
     m = content.match(fuzzyPattern);
-    if (m !== null && /[a-z]/i.test(m[0]))
+    if (m !== null && /[a-z]/i.test(m[0]) && fuzzyMatchIsReal(m[0], word))
       return { flaggedToken: m[0], matchedBadWord: word, matchType: 'fuzzy' };
   }
   return null;
